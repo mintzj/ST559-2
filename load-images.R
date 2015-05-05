@@ -20,7 +20,7 @@ folders.path <- list.files(path = training, full.names = T)
 folders.name <- list.files(path = training, full.names = F)
 
 # Get the files within a folder (we fixed the first folder number 1 here.)
-j <-  13
+j <-  16
 files <- list.files(path = folders.path[j], full.names = T)
 
 
@@ -44,6 +44,14 @@ mtext(folders.name[j],
       side=3, line=1, font=2, cex=1, col='red')
 
 par(def.par)  #- reset to default plot settings.
+
+
+# To do:  Load a folder via function
+#  Have an argument to create plots.
+function load_folder(){
+  
+  
+}
 
 
 
