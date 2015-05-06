@@ -1,13 +1,62 @@
 #  Improved data loading ---------------------------
 #  Use package EBImage to load files.
 
+
+#  Load a folder via function
+#  In:   folders_path
+#        n_images        #number of images to load. (default 9)
+#  OUt:  list containing the images.
+load_folder <- function(folders_path, n_images = 9){
+  require(EBImage)
+  
+  files <- list.files(path = folders_path, full.names = T)
+  n_images  <- min(n_images, length(files));
+  
+  #  For the sake of speed and sanity we will use 
+  #  only the first 9 images from each folder for now.
+  
+  # Create a list to hold the filenames.
+  images <- vector("list", image_max)
+  
+  for (i in 1:n_images){
+    images[[i]] <- as.matrix(readImage(files[i]))
+  }
+  return(images)
+}
+
+
+# Grab the folder names and paths.
+folders.path <- list.files(path = folders_path, full.names = T)
+folders.name <- list.files(path = folders_path, full.names = F)
+
+
+#  Load up n images from specified folder.
+im_out2 <- load_folder(folders.path[2], n_images = 10)
+image(im_out2[[2]])
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Prevous version of loader. ---------------------------
+
+
+
 #  Save your plot settings.
 def.par <- par(no.readonly = TRUE) 
 
 #  Install packages ---------------------------
 #  You need to run these lines the first time in order to install EBImage.
-source("http://bioconductor.org/biocLite.R")
-biocLite("EBImage")
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("EBImage")
 library(EBImage)
 #browseVignettes(package = "EBImage")
 
@@ -46,16 +95,20 @@ mtext(folders.name[j],
 par(def.par)  #- reset to default plot settings.
 
 
-# To do:  Load a folder via function
-#  Have an argument to create plots.
-function load_folder(){
-  
-  
-}
+
+
+folders.path <- list.files(path = folders_path, full.names = T)
+folders.name <- list.files(path = folders_path, full.names = F)
+
+# Get the files within a folder (we fixed the first folder number 1 here.)
+j <-  16
+files <- list.files(path = folders.path[j], full.names = T)
 
 
 
 
+im_out2 <- load_folder(folders.path[2], n_images = 10)
+image(im_out2[[2]])
 
 
 
