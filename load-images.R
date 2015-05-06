@@ -31,8 +31,10 @@ folders.name <- list.files(path = folders_path, full.names = F)
 
 
 #  Load up n images from specified folder.
-im_out2 <- load_folder(folders.path[2], n_images = 10)
-image(im_out2[[2]])
+images <- load_folder(folders.path[15], n_images = 10)
+image(images[[8]])
+
+folders.name[15]
 
 
 

@@ -6,23 +6,23 @@
 #   point in the package "grt", which was originally for matlab, but
 #   was ported to R.
 
-#install.packages("adimpro")
-library(adimpro)
-#  NOTE:  This masks "combine" function from EBImage
 
-images2 <- make.image(images[[1]])
-show.image(images2)
-edges <- edges(images2, type="Laplacian")
-show.image(edges)
-edges <- edges(images2, type="Sobel")
-show.image(edges)
-edges <- edges(images2, type="Robertcross")
-show.image(edges)
-
-#  Create a function to take in a matrix (or EBImage file?)
-#  Output a matrix representing the edges.
-
-function edge_detect(){
-  
-  
+#  Create a function find the edges via 3 methods.
+#  In:  image_target (in format of EBImage)
+#       edge_type    (type of detection:  Laplacian, Sobel, Robertcross)
+#  Out: edges (in format of EBImage)
+edge_detect  <- function (image_target, edge_type = "Sobel"){
+  require(adimpro)
+  require(EBImage)
+  adim_img  <- make.image(image_target)
+  adim_edges <- edges(img = adim_img, type = edge_type)
+  edges <- imageData<-(y = extract.image(adim_edges) )
+  return(edges)
 }
+
+
+im_edge <- edge_detect(images[[8]], edge_type = "Sobel")
+image(x = im_edge)
+image(images[[8]])
+
+
