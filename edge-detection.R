@@ -20,9 +20,15 @@ edge_detect  <- function (image_target, edge_type = "Sobel"){
   return(edges)
 }
 
-
-im_edge <- edge_detect(images[[8]], edge_type = "Sobel")
+image(images[[1]])
+im_edge <- edge_detect(images[[1]], edge_type = "Sobel")
 image(x = im_edge)
-image(images[[8]])
+im_edge2 <- edge_detect(im_edge, edge_type = "Sobel")
+image(x = im_edge2)
+im_edge3 <- edge_detect(im_edge2, edge_type = "Sobel")
+image(im_edge3)
+im_edge4 <- edge_detect(im_edge3, edge_type = "Sobel")
+image(im_edge4)
+
 
 

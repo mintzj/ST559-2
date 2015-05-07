@@ -10,13 +10,14 @@ load_folder <- function(folders_path, n_images = 9){
   require(EBImage)
   
   files <- list.files(path = folders_path, full.names = T)
+  #  Use  n_images, or all files, whichever is smaller
   n_images  <- min(n_images, length(files));
   
   #  For the sake of speed and sanity we will use 
   #  only the first 9 images from each folder for now.
   
   # Create a list to hold the filenames.
-  images <- vector("list", image_max)
+  images <- vector("list", n_images)
   
   for (i in 1:n_images){
     images[[i]] <- as.matrix(readImage(files[i]))
@@ -24,6 +25,7 @@ load_folder <- function(folders_path, n_images = 9){
   return(images)
 }
 
+folders_path <- "Z:/ST599/Project2/train"
 
 # Grab the folder names and paths.
 folders.path <- list.files(path = folders_path, full.names = T)
@@ -31,15 +33,36 @@ folders.name <- list.files(path = folders_path, full.names = F)
 
 
 #  Load up n images from specified folder.
-images <- load_folder(folders.path[15], n_images = 10)
-image(images[[8]])
+images <- load_folder(folders.path[20], n_images = 9)
+plot_images(images = images, folder_name = folders.name[20])
 
-folders.name[15]
-
-
-
+#image(images[[6]])
+#folders.name[15]
 
 
+
+
+
+#  plot_images()
+#  In:  list of images, folder_number
+#  Out:  ---
+#  Plot 9x9 grids of all images
+
+plot_images <- function(images, folder_name){
+  #  Save your plot settings.
+  def.par <- par(no.readonly = TRUE) 
+  
+  #  Divide the device into 3 rows and 3 columns
+  layout(matrix(c(1:9), 3, 3, byrow = TRUE))
+  
+  for (i in 1:length(images)){
+    image(images[[i]])
+  }
+  mtext(folder_name,
+        side=3, line=1, font=2, cex=1, col='red')
+  
+  par(def.par)  #- reset to default plot settings. 
+}
 
 
 
