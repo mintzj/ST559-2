@@ -21,14 +21,16 @@ edge_detect  <- function (image_target, edge_type = "Sobel"){
 }
 
 image(images[[1]])
-im_edge <- edge_detect(images[[1]], edge_type = "Sobel")
+im_edge <- edge_detect(images[[1]], edge_type = "Robertcross")
 image(x = im_edge)
-im_edge2 <- edge_detect(im_edge, edge_type = "Sobel")
+im_edge2 <- edge_detect(im_edge, edge_type = "Robertcross")
 image(x = im_edge2)
-im_edge3 <- edge_detect(im_edge2, edge_type = "Sobel")
+im_edge3 <- edge_detect(im_edge2, edge_type = "Robertcross")
 image(im_edge3)
-im_edge4 <- edge_detect(im_edge3, edge_type = "Sobel")
+im_edge4 <- edge_detect(im_edge3, edge_type = "Robertcross")
 image(im_edge4)
+
+
 
 
 
