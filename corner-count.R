@@ -54,8 +54,8 @@ corner_count  <- function(target_image, n = 1){
 
 #  Testing:
 system.time(image(images[[1]]))
-system.time(corner_detect(target_image = images[[1]]))
-corners_1 <- corner_detect(target_image = tunicate_salp[[2]])
+system.time(corner_detect(target_image = amphipods[[1]]))
+corners_1 <- corner_detect(target_image = amphipods[[2]])
 
 #  Bytecode compiled:
 corners_1 <- byte_corner(target_image = images[[1]])
@@ -78,9 +78,9 @@ image(tunicate_salp[[1]])
 
 # detect corners on thresh'd image ---------------------------
 high_spots <- px_thresh(tunicate_salp[[5]], thresh = 0.001)
-high_spots <- px_thresh(amphipods[[5]], thresh = 0.001)
+high_spots <- px_thresh(copepod_calanoid_large[[5]], thresh = 0.001)
 corners_2 <- corner_detect(high_spots)
-count_2 <- corner_count(target_image = corners_2, n = 20)
+count_2 <- corner_count(target_image = corners_2, n = 10)
 image(high_spots)
 image(corners_2)
 image(count_2)

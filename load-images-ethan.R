@@ -7,6 +7,8 @@
 
 library(EBImage)
 
+source(utility.R)
+
 load_folder <- function(folders_path){
   require(EBImage)
   files <- list.files(path = folders_path, full.names = T)

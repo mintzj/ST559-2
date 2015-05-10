@@ -3,6 +3,8 @@
 #  Out:   EBImage File (filter applied to highlight a few “pointy” spots)
 
 corner_detect <- function(target_image){
+  target_image <- imageData(target_image)
+  
   y <- dim(target_image)[1]
   x <- dim(target_image)[2]
 
