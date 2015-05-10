@@ -40,6 +40,30 @@ plot_images(images = images, folder_name = folders.name[20])
 #folders.name[15]
 
 
+# Modified image loader for ethan's functions. ---------------------------
+load_folder <- function(folders_path, test = F){
+  require(EBImage)
+  files <- list.files(path = folders_path, full.names = T)
+  #  Default:  Load all images in folder
+  #  If test = T, load first 5 images from each folder
+  
+  n_images  <- length(files);
+  if (test == T)
+    n_images  <- min(5, n_images)
+  
+  images <- vector("list", n_images)
+  
+  for (i in 1:n_images){
+    images[[i]] <- as.matrix(readImage(files[i]))
+  }
+  
+  names(images) <- list.files(folders_path)[1:n_images]
+  
+  return(images)
+}
+
+
+
 
 
 
