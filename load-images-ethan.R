@@ -154,3 +154,7 @@ sum.stats <- (agg.stats[,-1] %>% group_by(class)) %>% summarise_each(funs(mean))
 #     Right now, we have very few "strong" statistics; the best one we have is mean ink,
 #     Which really isn't sufficient with 121 classes, and aspect ratio, which is rotation-variant.
 #     (Maybe same solution with x/y moment; "deviation from 1" ?)
+#
+# Until then, let's write our data to a csv (avoiding the need to run again):
+
+write.csv(agg.stats, "aggstats.csv", na="NA")
