@@ -157,4 +157,4 @@ sum.stats <- (agg.stats[,-1] %>% group_by(class)) %>% summarise_each(funs(mean))
 #
 # Until then, let's write our data to a csv (avoiding the need to run again):
 
-write.csv(agg.stats, "aggstats.csv", na="NA")
+write.csv(agg.stats, "aggstats.csv", na="NA", row.names=FALSE)
