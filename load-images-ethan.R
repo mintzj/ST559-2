@@ -5,10 +5,13 @@
 
 # Loader functions:
 
+#  You need to run these lines the first time in order to install EBImage.
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("EBImage")
 library(EBImage)
 library(dplyr)
 
-source(utility.R)
+source("utility.R")
 
 load_folder <- function(folders_path){
   require(EBImage)
