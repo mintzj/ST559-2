@@ -35,7 +35,30 @@ bag.0.pred <- predict(bag.init, newdata=xval,
 confus <- bag.0.pred$confusion
 write.csv(confus, "bag_confusion.csv", na="NA")
 
-mc.error <- 1-(sum(diag(confus))/sum(confus))
+# mc.error <- 1-(sum(diag(confus))/sum(confus))
 # Not proper MC error; need to make sure all row names are included
 # It's not sorting all rows!
-# I can add this in after my 2pm class
+
+confus.f <- as.data.frame(matrix(numeric(121*121), nrow=121))
+colnames(confus.f) <- colnames(confus)
+rownames(confus.f) <- t(colnames(confus))
+
+confus.f[1,] <- confus[1,]
+confus.f[11,] <- confus[2,]
+confus.f[12,] <- confus[3,]
+confus.f[26,] <- confus[4,]
+confus.f[33,] <- confus[5,]
+confus.f[37,] <- confus[6,]
+confus.f[73,] <- confus[7,]
+confus.f[86,] <- confus[8,]
+confus.f[109,] <- confus[9,]
+confus.f[111,] <- confus[10,]
+confus.f[116,] <- confus[11,]
+
+c.rate <- sum(diag(as.matrix(confus.f))) / sum(confus.f)
+1 - c.rate  # Misclassifcation rate is 0.7902; this is pretty awful! AS for why.....
+
+rownames(confus)
+# All cross-validation
+
+# confus.f gives us the confusion matrix for our first algorithm.
