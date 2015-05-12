@@ -62,3 +62,10 @@ rownames(confus)
 # All cross-validation
 
 # confus.f gives us the confusion matrix for our first algorithm.
+image(as.matrix(confus.f), col=gray((0:32)/32),
+      main="Confusion matrix (black)", ylab="Observed",
+      xlab="Predicted", x=1:121, y=1:121)
+
+image(as.matrix(confus.f), col=gray((32:0)/32),
+      main="Confusion matrix (white)", ylab="Observed",
+      xlab="Predicted", x=1:121, y=1:121)
