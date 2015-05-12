@@ -103,9 +103,9 @@ edge_detect  <- function (image_target, edge_type = "Sobel"){
 #  In:  target_image (EBImage file)
 #       thresh  (threshold, % of pixels above which we keep)
 #  Out: matrix
-px_thresh <- function(target_image, thresh = 0.05){
-  fish <- as.vector(imageData(target_image))
-  fish_quantile  <- quantile(fish[fish<1],thresh)
+px_thresh <- function(target_image, thresh = 0.95){
+  fish <- 1-as.vector(imageData(target_image))
+  fish_quantile  <- quantile(fish[fish>0],thresh)
   paste(fish_quantile)
   high <-ifelse(fish>quantile(fish,fish_quantile),1,0)
   high <- matrix(high, nrow = dim(target_image)[1])
@@ -133,5 +133,63 @@ mini_loader <- function(folders_path, test = F){
   names(images) <- list.files(folders_path)[1:n_images]
   
   return(images)
+}
+
+#  Convert image into points, fit a linear model.
+#  in:  target_image (EBImage type)
+#  out:  linear model
+image_lm <- function(target_image, thresh = 0.95, plots = F){
+  lrt <- px_thresh(target_image, thresh)
+  lrt_dim <- dim(lrt)
+  x <- 1:lrt_dim[2]
+  y <- 1:lrt_dim[1]
+  lrt_vec <- as.vector(lrt)
+  x_mat <- lrt_vec*rep(y,lrt_dim[2])
+  y_mat <- lrt_vec*rep(1:lrt_dim[1], each=lrt_dim[2])
+  
+  hydro_lm <- lm(x_mat[x_mat>0]~y_mat[x_mat>0])
+
+  if (plots == T){
+    image(target_image)
+    image(lrt)
+    #  Cool Gradient:
+    image(matrix(x_mat, nrow = dim(lrt)[1]))
+    image(matrix(y_mat, nrow = dim(lrt)[1]))
+    plot(x = x_mat[x_mat>0], y = y_mat[x_mat>0])
+    abline(hydro_lm)
+  }  # Just for plotting.
+
+  
+  return(hydro_lm)
+}
+
+
+# Orient Image ---------------------------
+#  in: EBImage
+#  out:  EBImage
+orient_image <- function(target_image){
+  rocket_lm <- image_lm(target_image)
+  rocket_angle <- atan(x = rocket_lm$coefficients[[2]])*180/pi
+  origin <- computeFeatures.moment(target_image)[1:2]
+  rocket_rotate <- rotate(target_image,angle = -rocket_angle, bg.col = "white")
+  return(rocket_rotate)
+  
+}
+
+# 
+#
+#
+rvar.centrality <- function(){
+  
+  
+}
+
+# Descriptive Statistic:  Linear Model ---------------------------
+#  in: EBImage
+#  out:  R2 value
+rvar.lm <- function(target_image){
+  rocket_lm <- image_lm(target_image = target_image)
+  rocket_summary <- summary(rocket_lm)$r.squared
+  return(rocket_summary)
 }
 
