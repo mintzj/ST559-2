@@ -2,6 +2,7 @@ library(dplyr)
 library(rpart)
 library(adabag)
 library(randomForest)
+library(gbm)
 
 # Make sure your working directory is set to the source file location!
 
@@ -108,3 +109,13 @@ c.rate
 
 # 0.3292 - a sizable improvement over rpart,
 # but certainly not perfect.
+
+# Let's try boosting now!
+# 'adaboost' won't work since our response is multifactor; let's default to multinomial
+
+# prt = proc.time()
+# gbm.sim = gbm.fit(class~., data=xtrain, n.trees = 500, cv.folds = 3)
+# proc.time() - prt
+# 
+# NOTE: this has been commented out, as running on a system with 16gb RAM
+# was still enough to cause a crash from using all available memory.
