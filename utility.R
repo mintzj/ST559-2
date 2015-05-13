@@ -147,7 +147,17 @@ image_lm <- function(target_image, thresh = 0.95, plots = F){
   x_mat <- lrt_vec*rep(y,lrt_dim[2])
   y_mat <- lrt_vec*rep(1:lrt_dim[1], each=lrt_dim[2])
   
-  hydro_lm <- lm(x_mat[x_mat>0]~y_mat[x_mat>0])
+  hydro_lm <- tryCatch(expr = lm(x_mat[x_mat>0]~y_mat[x_mat>0]), 
+                       error = function(cond){
+                         #message("An image was singular:")
+                         #message(deparse(substitute(target_image)))
+                         # message(cond)
+                         #hydro_lm <- c(r.squared = 0)
+                         #plots <- F  #something is wrong with the scope of this, so don't use it till its fixed.
+                         hydro_lm <- vector(mode = "list", length = 2)
+                         hydro_lm$r.squared  <-  0
+                         return(hydro_lm)
+                       })  #return(c(r.squared = 0)))
 
   if (plots == T){
     image(target_image)
@@ -159,10 +169,8 @@ image_lm <- function(target_image, thresh = 0.95, plots = F){
     abline(hydro_lm)
   }  # Just for plotting.
 
-  
   return(hydro_lm)
 }
-
 
 # Orient Image ---------------------------
 #  in: EBImage
@@ -189,7 +197,12 @@ rvar.centrality <- function(){
 #  out:  R2 value
 rvar.lm <- function(target_image){
   rocket_lm <- image_lm(target_image = target_image)
-  rocket_summary <- summary(rocket_lm)$r.squared
+  #  rocket_summary <- summary(rocket_lm)$r.squared
+  rocket_summary <- tryCatch(expr = summary(rocket_lm)$r.squared, 
+                             error = function(cond){
+                               return(0)
+                             })
+
   return(rocket_summary)
 }
 
