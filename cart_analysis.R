@@ -1,6 +1,7 @@
 library(dplyr)
 library(rpart)
 library(adabag)
+library(randomForest)
 
 # Make sure your working directory is set to the source file location!
 
@@ -69,3 +70,41 @@ image(as.matrix(confus.f), col=gray((0:32)/32),
 image(as.matrix(confus.f), col=gray((32:0)/32),
       main="Confusion matrix (white)", ylab="Observed",
       xlab="Predicted", x=1:121, y=1:121)
+
+# So, we've tried bagging.
+# How about random forests instead?
+
+rf.time <- proc.time()
+x.rf <- randomForest(class ~ ., data=xtrain)
+proc.time() - rf.time
+
+# This takes 66.66 seconds; not bad!
+# Let's try predictions...
+
+rf.time <- proc.time()
+rf.pred <- predict(x.rf, xval)
+proc.time() - rf.time
+
+# 1.64 seconds! This is not bad at all.
+# So if it's much quicker, let's see instead how it performs by creating a confusion matrix.
+
+confus.rf <- matrix(numeric(121*121), nrow=121)
+for (i in 1:dim(xval)[1]) {
+  j <- which(sort(unique(xval$class)) == xval[i,]$class)
+  k <- which(sort(unique(xval$class)) == rf.pred[i])
+  confus.rf[j,k] = confus.rf[j,k] + 1
+}
+
+image(as.matrix(confus.rf), col=gray((0:32)/32),
+      main="Confusion matrix (black)", ylab="Observed",
+      xlab="Predicted", x=1:121, y=1:121)
+
+image(as.matrix(confus.rf), col=gray((32:0)/32),
+      main="Confusion matrix (white)", ylab="Observed",
+      xlab="Predicted", x=1:121, y=1:121)
+
+c.rate <- sum(diag(as.matrix(confus.rf))) / sum(confus.rf)
+c.rate
+
+# 0.3292 - a sizable improvement over rpart,
+# but certainly not perfect.
