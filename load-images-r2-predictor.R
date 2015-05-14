@@ -104,7 +104,7 @@ for (i in 1:length(folders.name)) {
 # Let's fix it to do this:
 
 analyze.list <- function(imagelist, classname) {
-  v.leng <- length(imagelist); h.leng <- 11;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
+  v.leng <- length(imagelist); h.leng <- 10;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
   stats.mat <- as.data.frame(matrix(numeric(v.leng*h.leng), nrow=v.leng))
   names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
                         "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
@@ -120,8 +120,8 @@ analyze.list <- function(imagelist, classname) {
     stats.mat[i,7] <- computeFeatures.moment(imagelist[[i]])[,4]
     stats.mat[i,8] <- computeFeatures.moment(imagelist[[i]])[,5]
     stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1]
-    stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,11] <- rvar.lm(imagelist[[i]])
+    #stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
+    stats.mat[i,10] <- rvar.lm(imagelist[[i]])
     # ADD MORE STATISTICS HERE AS NECESSARY!
   }  
   return(stats.mat)
