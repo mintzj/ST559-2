@@ -103,11 +103,18 @@ for (i in 1:length(folders.name)) {
 # and "worklist" (the list), right?
 # Let's fix it to do this:
 
+
+#'  To add a statistic, increase the length of the stats.mat, add a name to your variable,
+#'  add a statistic in the list.
+#'  test: What if there were 9?
 analyze.list <- function(imagelist, classname) {
-  v.leng <- length(imagelist); h.leng <- 10;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
+  v.leng <- length(imagelist); h.leng <- 15;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
   stats.mat <- as.data.frame(matrix(numeric(v.leng*h.leng), nrow=v.leng))
   names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
-                        "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
+                        "d.center", "eccentricity", "theta",  "x.moment", "y.moment",
+                        "R2", "Centrality","left_right","line","corners")
+  #  names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
+  #                      "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
   
   for (i in 1:length(imagelist)) {
     stats.mat[i,1] <- names(imagelist)[i]          # Likely unnecessary for training set
@@ -120,8 +127,13 @@ analyze.list <- function(imagelist, classname) {
     stats.mat[i,7] <- computeFeatures.moment(imagelist[[i]])[,4]
     stats.mat[i,8] <- computeFeatures.moment(imagelist[[i]])[,5]
     stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1]
-    #stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,10] <- rvar.lm(imagelist[[i]])
+    stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
+    stats.mat[i,11] <- rvar.lm(imagelist[[i]])
+    stats.mat[i,12] <- rvar.centrality(imagelist[[i]])
+    stats.mat[i,13] <- rvar.left_right(imagelist[[i]])
+    stats.mat[i,14] <- rvar.line(imagelist[[i]])
+    stats.mat[i,15] <- rvar.corners(imagelist[[i]])    
+    
     # ADD MORE STATISTICS HERE AS NECESSARY!
   }  
   return(stats.mat)

@@ -65,11 +65,11 @@ rownames(confus)
 
 # confus.f gives us the confusion matrix for our first algorithm.
 image(as.matrix(confus.f), col=gray((0:32)/32),
-      main="Confusion matrix (black)", ylab="Observed",
+      main="rpart Confusion matrix (black)", ylab="Observed",
       xlab="Predicted", x=1:121, y=1:121)
 
 image(as.matrix(confus.f), col=gray((32:0)/32),
-      main="Confusion matrix (white)", ylab="Observed",
+      main="rpart Confusion matrix (white)", ylab="Observed",
       xlab="Predicted", x=1:121, y=1:121)
 
 # So, we've tried bagging.
@@ -97,11 +97,11 @@ for (i in 1:dim(xval)[1]) {
 }
 
 image(as.matrix(confus.rf), col=gray((0:32)/32),
-      main="Confusion matrix (black)", ylab="Observed",
+      main="Random-Forest Confusion matrix (black)", ylab="Observed",
       xlab="Predicted", x=1:121, y=1:121)
 
 image(as.matrix(confus.rf), col=gray((32:0)/32),
-      main="Confusion matrix (white)", ylab="Observed",
+      main="Random-Forest Confusion matrix (white)", ylab="Observed",
       xlab="Predicted", x=1:121, y=1:121)
 
 c.rate <- sum(diag(as.matrix(confus.rf))) / sum(confus.rf)

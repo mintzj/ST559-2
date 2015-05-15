@@ -2,6 +2,7 @@
 #  These functions should interface with Ethan's CART analysis.
 
 library(EBImage)
+library(MASS)
 
 
 #  Name:  corner-detect.R
@@ -138,7 +139,7 @@ mini_loader <- function(folders_path, test = F){
 #  Convert image into points, fit a linear model.
 #  in:  target_image (EBImage type)
 #  out:  linear model
-image_lm <- function(target_image, thresh = 0.95, plots = F){
+image_lm <- function(target_image, thresh = 0.95, plots = F, robust = F){
   lrt <- px_thresh(target_image, thresh)
   lrt_dim <- dim(lrt)
   x <- 1:lrt_dim[2]
@@ -147,17 +148,30 @@ image_lm <- function(target_image, thresh = 0.95, plots = F){
   x_mat <- lrt_vec*rep(y,lrt_dim[2])
   y_mat <- lrt_vec*rep(1:lrt_dim[1], each=lrt_dim[2])
   
-  hydro_lm <- tryCatch(expr = lm(x_mat[x_mat>0]~y_mat[x_mat>0]), 
-                       error = function(cond){
-                         #message("An image was singular:")
-                         #message(deparse(substitute(target_image)))
-                         # message(cond)
-                         #hydro_lm <- c(r.squared = 0)
-                         #plots <- F  #something is wrong with the scope of this, so don't use it till its fixed.
-                         hydro_lm <- vector(mode = "list", length = 2)
-                         hydro_lm$r.squared  <-  0
-                         return(hydro_lm)
-                       })  #return(c(r.squared = 0)))
+  if (robust == T){
+    #message("Robust Regression Enabled")
+    hydro_lm <- tryCatch(expr = ltsreg(x_mat[x_mat>0]~y_mat[x_mat>0]),
+                         error = function(cond){
+                           hydro_lm <- vector(mode = "list", length = 2)
+                           hydro_lm$r.squared  <-  0
+                           return(hydro_lm)
+                         })
+    }
+    if (robust == F){
+    hydro_lm <- tryCatch(expr = lm(x_mat[x_mat>0]~y_mat[x_mat>0]), 
+                         error = function(cond){
+                           #message("An image was singular:")
+                           #message(deparse(substitute(target_image)))
+                           # message(cond)
+                           #hydro_lm <- c(r.squared = 0)
+                           #plots <- F  #something is wrong with the scope of this, so don't use it till its fixed.
+                           hydro_lm <- vector(mode = "list", length = 2)
+                           hydro_lm$r.squared  <-  0
+                           return(hydro_lm)
+                         })  #return(c(r.squared = 0)))
+    
+  }
+
 
   if (plots == T){
     image(target_image)
@@ -175,9 +189,13 @@ image_lm <- function(target_image, thresh = 0.95, plots = F){
 # Orient Image ---------------------------
 #  in: EBImage
 #  out:  EBImage
-orient_image <- function(target_image){
-  rocket_lm <- image_lm(target_image)
-  rocket_angle <- atan(x = rocket_lm$coefficients[[2]])*180/pi
+orient_image <- function(target_image, robust = F){
+  rocket_lm <- image_lm(target_image, robust = robust)
+  if (is.numeric(rocket_lm$coefficients[[2]])==F)
+    rocket_angle <- 0
+  if (is.numeric(rocket_lm$coefficients[[2]])==T)
+    rocket_angle <- atan(x = rocket_lm$coefficients[[2]])*180/pi
+  
   origin <- computeFeatures.moment(target_image)[1:2]
   rocket_rotate <- rotate(target_image,angle = -rocket_angle, bg.col = "white")
   return(rocket_rotate)
@@ -185,11 +203,68 @@ orient_image <- function(target_image){
 }
 
 # 
-#
-#
-rvar.centrality <- function(){
+#  Find the percentatge of pixels in the middle part of the image.  Take the center, and add ~25% on each side.
+rvar.centrality <- function(target_image, n = 5, robust = F){
+  rotated <- orient_image(target_image, robust = robust)
+  rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
+  count_rotated_threshed <- corner_count(rotated_threshed, n = n)
+  center <- ceiling(n+1)/2
+  top <- center + floor(n/4)
+  bottom <- center - floor(n/4)
+  #message(paste(bottom, " ", center, " ", top))
+  ratio <- sum(count_rotated_threshed[bottom:top,bottom:top])/sum(count_rotated_threshed)
+  if(is.nan(ratio)==T)
+    ratio <- 0  
+  if(is.infinite(ratio)==T)
+    ratio <- 0
+  return(ratio)  
+}
+
+#  Find the percentage of pixels in the (n+1)/2 row (the center row) of an image, after rotation
+rvar.line <- function(target_image, n = 5){
+    rotated <- orient_image(target_image, robust = F)
+  rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
+  count_rotated_threshed <- corner_count(rotated_threshed, n = 5)
+  ratio <- sum(count_rotated_threshed[,ceiling((n+1)/2)]/sum(count_rotated_threshed))
+  if(is.nan(ratio)==T)
+    ratio <- 0  
+  return(ratio)
+}
+
+# Ratio of left to right.
+rvar.left_right <- function(target_image, n = 5){
+  rotated <- orient_image(target_image, robust = robust)
+  rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
+  count_rotated_threshed <- corner_count(rotated_threshed, n = n)
+  dim_max <- dim(count_rotated_threshed)[2]
+  center <- ceiling(n+1)/2
+  left <- 1+floor(n/4)
+  right <- dim_max - floor(n/4)
+  #indices <- c(1:left,right:dim_max)
+  #message(paste(bottom, " ", center, " ", top))
+  ratio <- sum(count_rotated_threshed[1:left,])/sum(count_rotated_threshed[right:dim_max,])
+  if(is.nan(ratio)==T)
+    ratio <- 0
+  if(is.infinite(ratio)==T)
+    ratio <- 0
+  return(ratio)  
   
-  
+}
+
+# ratio of corners to center
+rvar.corners <- function(target_image, n = 5){
+  rotated <- orient_image(target_image, robust = robust)
+  rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
+  count_rotated_threshed <- corner_count(rotated_threshed, n = n)
+  dim_max <- dim(count_rotated_threshed)[2]
+  center <- ceiling(n+1)/2
+  left <- 1+floor(n/4)
+  right <- dim_max - floor(n/4)
+  indices <- c(1:left,right:dim_max)
+  ratio <- sum(count_rotated_threshed[indices,indices])/sum(count_rotated_threshed)
+  if(is.nan(ratio)==T)
+    ratio <- 0  
+  return(ratio)
 }
 
 # Descriptive Statistic:  Linear Model ---------------------------
