@@ -106,24 +106,26 @@ for (i in 1:length(folders.name)) {
 # and "worklist" (the list), right?
 # Let's fix it to do this:
 
-analyze.list <- function(imagelist, classname) {
+analyze.list <- function(imagelist) {
   v.leng <- length(imagelist); h.leng <- 10;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
   stats.mat <- as.data.frame(matrix(numeric(v.leng*h.leng), nrow=v.leng))
-  names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
-                        "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
+  names(stats.mat) <- c("filename", "ink.mean", "ink.var", "aspect.ratio", 
+                        "R2", "Centrality","left_right","line","corners", "class")
+  #  names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
+  #                      "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
   
   for (i in 1:length(imagelist)) {
     stats.mat[i,1] <- names(imagelist)[i]          # Likely unnecessary for training set
-    stats.mat[i,2] <- classname
-    stats.mat[i,3] <- as.numeric(mean(imageData(imagelist[[i]])))
-    stats.mat[i,4] <- var(as.numeric(imageData(imagelist[[i]])))
-    stats.mat[i,5] <- dim(imageData(imagelist[[i]]))[1] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,6] <- sqrt((computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1])^2 +
-                      (computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2])^2)
-    stats.mat[i,7] <- computeFeatures.moment(imagelist[[i]])[,4]
-    stats.mat[i,8] <- computeFeatures.moment(imagelist[[i]])[,5]
-    stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1]
-    stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
+    stats.mat[i,2] <- as.numeric(mean(imageData(imagelist[[i]])))
+    stats.mat[i,3] <- var(as.numeric(imageData(imagelist[[i]])))
+    stats.mat[i,4] <- dim(imageData(imagelist[[i]]))[1] / dim(imageData(imagelist[[i]]))[2]
+    stats.mat[i,5] <- rvar.lm(imagelist[[i]])
+    stats.mat[i,6] <- rvar.centrality(imagelist[[i]])
+    stats.mat[i,7] <- log(rvar.left_right(imagelist[[i]]))
+    stats.mat[i,8] <- rvar.line(imagelist[[i]])
+    stats.mat[i,9] <- rvar.corners(imagelist[[i]])    
+    stats.mat[i,10] <- as.character(substitute(imagelist))
+    
     # ADD MORE STATISTICS HERE AS NECESSARY!
   }  
   return(stats.mat)
@@ -134,7 +136,7 @@ agg.stats <- NULL
 agg.time <- proc.time()
 for (i in folders.name) {
   worklist <- get(i)
-  agg.stats <- rbind(agg.stats, analyze.list(worklist, i))
+  agg.stats <- rbind(agg.stats, analyze.list(worklist))
 }
 proc.time() - agg.time
 
