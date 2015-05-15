@@ -130,7 +130,7 @@ analyze.list <- function(imagelist, classname) {
     stats.mat[i,10] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
     stats.mat[i,11] <- rvar.lm(imagelist[[i]])
     stats.mat[i,12] <- rvar.centrality(imagelist[[i]])
-    stats.mat[i,13] <- rvar.left_right(imagelist[[i]])
+    stats.mat[i,13] <- log(rvar.left_right(imagelist[[i]]))
     stats.mat[i,14] <- rvar.line(imagelist[[i]])
     stats.mat[i,15] <- rvar.corners(imagelist[[i]])    
     
