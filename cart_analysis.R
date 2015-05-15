@@ -119,3 +119,6 @@ c.rate
 # 
 # NOTE: this has been commented out, as running on a system with 16gb RAM
 # was still enough to cause a crash from using all available memory.
+
+# From here, our final goal is clear.
+# We will create a new .R file, "final_sub.R," and use it to evaluate the test set.
