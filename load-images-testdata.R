@@ -21,10 +21,9 @@ load_bits <- function(folders_path, n_start, n_end){
 }
 
 analyze.list <- function(imagelist) {
-  v.leng <- length(imagelist); h.leng <- 14;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
+  v.leng <- length(imagelist); h.leng <- 9;   # EDIT h.leng AS MORE STATISTICS ARE FIGURED OUT!
   stats.mat <- as.data.frame(matrix(numeric(v.leng*h.leng), nrow=v.leng))
   names(stats.mat) <- c("filename", "ink.mean", "ink.var", "aspect.ratio", 
-                        "d.center", "eccentricity", "theta",  "x.moment", "y.moment",
                         "R2", "Centrality","left_right","line","corners")
   #  names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
   #                      "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
@@ -34,17 +33,11 @@ analyze.list <- function(imagelist) {
     stats.mat[i,2] <- as.numeric(mean(imageData(imagelist[[i]])))
     stats.mat[i,3] <- var(as.numeric(imageData(imagelist[[i]])))
     stats.mat[i,4] <- dim(imageData(imagelist[[i]]))[1] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,5] <- sqrt((computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1])^2 +
-                             (computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2])^2)
-    stats.mat[i,6] <- computeFeatures.moment(imagelist[[i]])[,4]
-    stats.mat[i,7] <- computeFeatures.moment(imagelist[[i]])[,5]
-    stats.mat[i,8] <- computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1]
-    stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,10] <- rvar.lm(imagelist[[i]])
-    stats.mat[i,11] <- rvar.centrality(imagelist[[i]])
-    stats.mat[i,12] <- log(rvar.left_right(imagelist[[i]]))
-    stats.mat[i,13] <- rvar.line(imagelist[[i]])
-    stats.mat[i,14] <- rvar.corners(imagelist[[i]])    
+    stats.mat[i,5] <- rvar.lm(imagelist[[i]])
+    stats.mat[i,6] <- rvar.centrality(imagelist[[i]])
+    stats.mat[i,7] <- log(rvar.left_right(imagelist[[i]]))
+    stats.mat[i,8] <- rvar.line(imagelist[[i]])
+    stats.mat[i,9] <- rvar.corners(imagelist[[i]])    
     
     # ADD MORE STATISTICS HERE AS NECESSARY!
   }  
@@ -52,6 +45,7 @@ analyze.list <- function(imagelist) {
 }
 
 folders_path <- "D:/Media/Documents/School/STAT599-1/ST559-2/test"
+robust = F
 
 # test <- proc.time();
 # test2 <- load_bits(folders_path, 1, 2500);
@@ -80,7 +74,7 @@ folders_path <- "D:/Media/Documents/School/STAT599-1/ST559-2/test"
 # While we're here, let's also makes sure the analysis works on an imagelist of size 10000:
 #
 test <- proc.time()
-test2 <- analyze.list(load_bits(folders_path, 1, 10000))
+test2 <- analyze.list(load_bits(folders_path, 1, 2))
 proc.time() - test
 #
 # Runtime: 23 seconds
@@ -107,6 +101,23 @@ agg.time <- proc.time()
 for (i in 1:ceiling(no_images/lsize)) {
   worklist <- load_bits(folders_path, ((i-1)*lsize)+1, min(i*lsize,no_images))
   bindlist <- analyze.list(worklist)
-  rbind(agg.test, worklist)
+  path <- paste("test",(i-1)*10000 + 1,sep='')
+  assign(path,bindlist)
 }
 proc.time() - agg.time
+# Takes 9018s, but it's done!
+# We can now export the files, through write.csv -
+
+# Or we would be able to. It bricked R last night.
+# Splitting and trying again.
+# With the split functional, we write our data:
+
+write.time <- proc.time()
+for (i in 1:ceiling(no_images/lsize)) {
+  path <- paste("test",(i-1)*10000 + 1,sep='')
+  write.csv(get(path), paste(path, ".csv",sep=''), na="NA", row.names=FALSE)
+}
+proc.time() - write.time
+
+# 20 seconds - much more reasonable.
+# And with that, our data is created!
