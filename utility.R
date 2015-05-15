@@ -37,6 +37,8 @@ corner_detect <- function(target_image){
   for(i in 2:(x-1))
     for(j in 2:(y-1))
       grad.xy[j,i] <- (sumgrad[j+1,i]-sumgrad[j-1,i])/2
+      #grad.xy[j,i] <- (grad.x[j+1,i]-grad.x[j-1,i])/2
+      
   
   
   # H matrix.
@@ -232,7 +234,7 @@ rvar.line <- function(target_image, n = 5){
 }
 
 # Ratio of left to right.
-rvar.left_right <- function(target_image, n = 5){
+rvar.left_right <- function(target_image, n = 5, robust = F){
   rotated <- orient_image(target_image, robust = robust)
   rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
   count_rotated_threshed <- corner_count(rotated_threshed, n = n)
@@ -244,15 +246,17 @@ rvar.left_right <- function(target_image, n = 5){
   #message(paste(bottom, " ", center, " ", top))
   ratio <- sum(count_rotated_threshed[1:left,])/sum(count_rotated_threshed[right:dim_max,])
   if(is.nan(ratio)==T)
-    ratio <- 0
-  if(is.infinite(ratio)==T)
-    ratio <- 0
-  return(ratio)  
+    return(0)
+  if(is.nan(log(ratio))==T)
+    return(0)
+  if(is.infinite(log(ratio))==T)
+    return(0)
+  return(log(ratio))
   
 }
 
 # ratio of corners to center
-rvar.corners <- function(target_image, n = 5){
+rvar.corners <- function(target_image, n = 5, robust = F){
   rotated <- orient_image(target_image, robust = robust)
   rotated_threshed <- px_thresh(target_image = rotated, thresh = 0.999)
   count_rotated_threshed <- corner_count(rotated_threshed, n = n)

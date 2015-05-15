@@ -3,19 +3,23 @@ library(dplyr)
 
 source("utility.R")
 
+
+
 load_bits <- function(folders_path, n_start, n_end){
+  #message(paste(n_start, " ", n_end))
   require(EBImage)
-  files <- list.files(path = folders_path, full.names = T)
-  
+
   n_images  <- n_end - n_start + 1;
   
   images <- vector("list", n_images)
   
   for (i in 1:n_images){
     images[[i]] <- as.matrix(readImage(files[n_start + i - 1]))
+    #message(paste("reading: ",(n_start + i - 1), " ", files[n_start + i - 1]))
   }
   
-  names(images) <- list.files(folders_path)[n_start:n_end]
+  names(images) <- files[n_start:n_end]
+  #message(paste(files[n_start:n_end], sep = ", "))
   
   return(images)
 }
@@ -42,7 +46,7 @@ analyze.list <- function(imagelist) {
     stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
     stats.mat[i,10] <- rvar.lm(imagelist[[i]])
     stats.mat[i,11] <- rvar.centrality(imagelist[[i]])
-    stats.mat[i,12] <- log(rvar.left_right(imagelist[[i]]))
+    stats.mat[i,12] <- rvar.left_right(imagelist[[i]])
     stats.mat[i,13] <- rvar.line(imagelist[[i]])
     stats.mat[i,14] <- rvar.corners(imagelist[[i]])    
     
@@ -51,7 +55,9 @@ analyze.list <- function(imagelist) {
   return(stats.mat)
 }
 
+#  folders_path  <- "Z:/ST599/Project2/test/test"
 folders_path <- "D:/Media/Documents/School/STAT599-1/ST559-2/test"
+files <- list.files(path = folders_path, full.names = T)
 
 # test <- proc.time();
 # test2 <- load_bits(folders_path, 1, 2500);
@@ -79,9 +85,12 @@ folders_path <- "D:/Media/Documents/School/STAT599-1/ST559-2/test"
 #
 # While we're here, let's also makes sure the analysis works on an imagelist of size 10000:
 #
+
 test <- proc.time()
-test2 <- analyze.list(load_bits(folders_path, 1, 10000))
+test4<- analyze.list(load_bits(folders_path, 5001, 6000))
 proc.time() - test
+
+test6 <- analyze.list(load_bits(folders_path, 6650, 6770))
 #
 # Runtime: 23 seconds
 # PERFECT- except not, actually.
@@ -95,18 +104,41 @@ proc.time() - test
 
 
 
-
-no_images <- length(list.files(folders_path))
+file_vector <- as.vector(files)
+#no_images <- length(files)
+no_images <- 105
 # 130400, in our case.
-lsize <- 10000
+#lsize <- 10000
+lsize <- 100
 # We set each list load to be 10000.
 
 agg.test <- NULL
 
 agg.time <- proc.time()
+#for (i in 1:ceiling(no_images/lsize)) {
 for (i in 1:ceiling(no_images/lsize)) {
+  agg.test <- NULL
+  # Worklist holds images.
   worklist <- load_bits(folders_path, ((i-1)*lsize)+1, min(i*lsize,no_images))
+  # Bindlist holds summaries of each element in worklist.
   bindlist <- analyze.list(worklist)
-  rbind(agg.test, worklist)
+  
+  #rbind(agg.test, worklist)
+  agg.test <- rbind(agg.test, bindlist)
+  write.csv(agg.test, paste("aggstats_part",i,".csv", sep = ""), na="NA", row.names=FALSE)
+  
 }
 proc.time() - agg.time
+
+agg.test <- NULL
+
+#  Read back the data.
+for (i in 1:ceiling(no_images/lsize)){
+  read_file <- read.csv(paste("aggstats_part",i,".csv", sep = ""))#[,-1]
+  agg.test <- rbind(agg.test, read_file)
+}
+View(agg.test)
+
+
+
+
