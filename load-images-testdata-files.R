@@ -29,29 +29,38 @@ analyze.list <- function(imagelist) {
   stats.mat <- as.data.frame(matrix(numeric(v.leng*h.leng), nrow=v.leng))
   names(stats.mat) <- c("filename", "ink.mean", "ink.var", "aspect.ratio", 
                         "d.center", "eccentricity", "theta",  "x.moment", "y.moment",
-                        "R2", "Centrality","left_right","line","corners")
-  #  names(stats.mat) <- c("filename", "class", "ink.mean", "ink.var", "aspect.ratio", 
-  #                      "d.center", "eccentricity", "theta",  "x.moment", "y.moment")
-  
+                        "R2", "Centrality","left_right","line","corners")  
+
+  #test <- proc.time()
   for (i in 1:length(imagelist)) {
-    stats.mat[i,1] <- names(imagelist)[i]          # Likely unnecessary for training set
-    stats.mat[i,2] <- as.numeric(mean(imageData(imagelist[[i]])))
-    stats.mat[i,3] <- var(as.numeric(imageData(imagelist[[i]])))
-    stats.mat[i,4] <- dim(imageData(imagelist[[i]]))[1] / dim(imageData(imagelist[[i]]))[2]
-    stats.mat[i,5] <- sqrt((computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1])^2 +
-                             (computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2])^2)
-    stats.mat[i,6] <- computeFeatures.moment(imagelist[[i]])[,4]
-    stats.mat[i,7] <- computeFeatures.moment(imagelist[[i]])[,5]
-    stats.mat[i,8] <- computeFeatures.moment(imagelist[[i]])[,1] / dim(imageData(imagelist[[i]]))[1]
-    stats.mat[i,9] <- computeFeatures.moment(imagelist[[i]])[,2] / dim(imageData(imagelist[[i]]))[2]
+    #test <- proc.time()
+    features <- (computeFeatures.moment(imagelist[[i]]))
+    if(is.null(features)==T){
+       features <- matrix(rep(0,5), nrow = 1)
+    }
+    
+    img_dat <- imageData(imagelist[[i]])
+    x <- dim(img_dat)[2]
+    y <- dim(img_dat)[1]
+    #stats.mat[i,1] <- names(imagelist)[i]          # Likely unnecessary for training set
+    stats.mat[i,2] <- as.numeric(mean(img_dat))
+    stats.mat[i,3] <- var(as.numeric(img_dat))
+    stats.mat[i,4] <- dim(imageData(imagelist[[i]]))[1] / x
+    stats.mat[i,5] <- sqrt((features[,1] / y)^2 + (features[,2] / x)^2)
+    stats.mat[i,6] <- features[,4]
+    stats.mat[i,7] <- features[,5]
+    stats.mat[i,8] <- features[,1] / y
+    stats.mat[i,9] <- features[,2] / x
     stats.mat[i,10] <- rvar.lm(imagelist[[i]])
     stats.mat[i,11] <- rvar.centrality(imagelist[[i]])
     stats.mat[i,12] <- rvar.left_right(imagelist[[i]])
     stats.mat[i,13] <- rvar.line(imagelist[[i]])
     stats.mat[i,14] <- rvar.corners(imagelist[[i]])    
-    
+    #proc.time() - test
     # ADD MORE STATISTICS HERE AS NECESSARY!
   }  
+  #proc.time() - test
+
   return(stats.mat)
 }
 
@@ -105,11 +114,11 @@ test6 <- analyze.list(load_bits(folders_path, 6650, 6770))
 
 
 file_vector <- as.vector(files)
-#no_images <- length(files)
-no_images <- 105
+no_images <- length(files)
+#no_images <- 105
 # 130400, in our case.
-#lsize <- 10000
-lsize <- 100
+lsize <- 10000
+#lsize <- 100
 # We set each list load to be 10000.
 
 agg.test <- NULL
@@ -137,8 +146,14 @@ for (i in 1:ceiling(no_images/lsize)){
   read_file <- read.csv(paste("aggstats_part",i,".csv", sep = ""))#[,-1]
   agg.test <- rbind(agg.test, read_file)
 }
-View(agg.test)
+
+#  combine all the data into one saved file.
+#dim(agg.test)
+#write.csv(agg.test, "aggstats_combined.csv", na="NA", row.names=FALSE)
 
 
-
-
+# add the filenames.
+test_stats <- agg.test
+test_stats[,1] <- files
+#head(test_stats)
+write.csv(test_stats, "aggstats_full.csv", na="NA", row.names=FALSE)
